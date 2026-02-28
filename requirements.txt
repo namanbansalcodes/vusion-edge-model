@@ -1,0 +1,12 @@
+# Core ML dependencies
+torch>=2.0.0
+transformers>=4.30.0
+peft>=0.4.0
+Pillow>=9.0.0
+
+# Web framework
+Django>=6.0.0
+
+# Optional (for advanced features)
+# bitsandbytes>=0.40.0  # 4-bit quantization
+# accelerate>=0.20.0    # Faster loading
