@@ -12,8 +12,8 @@ const videoName = document.getElementById('videoName');
 const videoCounter = document.getElementById('videoCounter');
 
 let isProcessing = false;
-let autoAnalyze = true;
-const ANALYSIS_INTERVAL = 3000; // Analyze every 3 seconds
+let autoAnalyze = true; // Always running
+const ANALYSIS_INTERVAL = 2000; // Analyze every 2 seconds continuously
 
 // Video playlist management
 let currentVideoIndex = 0;
@@ -75,22 +75,22 @@ async function checkModelStatus() {
 
         if (data.loaded) {
             statusIndicator.className = 'status-ready';
-            statusText.textContent = '✓ Model Ready';
+            statusText.textContent = 'Model ready';
             analyzeBtn.disabled = false;
 
-            // Start auto-analysis if enabled
+            // Start continuous analysis immediately
             if (autoAnalyze) {
-                startAutoAnalysis();
+                processFrame(); // Immediate first analysis
+                startAutoAnalysis(); // Then continue every 2 seconds
             }
         } else {
             statusIndicator.className = 'status-loading';
-            statusText.textContent = 'Loading model...';
-            // Retry in 2 seconds
+            statusText.textContent = 'Loading model';
             setTimeout(checkModelStatus, 2000);
         }
     } catch (error) {
         statusIndicator.className = 'status-error';
-        statusText.textContent = '✗ Model Error';
+        statusText.textContent = 'Model error';
         console.error('Model status check failed:', error);
     }
 }
@@ -110,12 +110,11 @@ async function processFrame() {
 
     isProcessing = true;
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = '⏳ Processing...';
+    analyzeBtn.textContent = 'Processing...';
 
     try {
-        // Reset workflow UI
         updateStepStatus('paligemma', 'processing');
-        updateLogs('paligemma', ['Capturing frame...', 'Running PaliGemma detection...']);
+        updateLogs('paligemma', ['Capturing frame', 'Running detection']);
 
         // Capture frame
         const frameData = captureFrame();
@@ -152,7 +151,7 @@ async function processFrame() {
     } finally {
         isProcessing = false;
         analyzeBtn.disabled = false;
-        analyzeBtn.textContent = '🔍 Analyze Current Frame';
+        analyzeBtn.textContent = 'Analyze Frame';
     }
 }
 
@@ -179,8 +178,8 @@ function updatePaliGemmaStep(data) {
         document.getElementById('step-paligemma').classList.add('active');
     } else {
         outputDiv.innerHTML = `
-            <div style="color: #00ff00;">
-                ✓ No stock-outs detected
+            <div style="color: #0f0;">
+                No stock-outs detected
             </div>
         `;
         document.getElementById('step-paligemma').classList.remove('active');
@@ -202,14 +201,14 @@ function updateGemmaStep(data) {
         } else {
             outputDiv.innerHTML = `
                 <span class="placeholder">
-                    🔄 Gemma integration pending (teammate)
+                    Integration pending
                 </span>
             `;
         }
     } else {
         outputDiv.innerHTML = `
             <span class="placeholder">
-                Skipped (no stock-out detected)
+                Skipped
             </span>
         `;
         document.getElementById('step-gemma').classList.remove('active');
@@ -269,12 +268,12 @@ function updateLogs(step, logs) {
     ).join('');
 }
 
-// Auto-analysis loop
+// Auto-analysis loop - runs continuously
 let autoAnalysisInterval;
 function startAutoAnalysis() {
     autoAnalysisInterval = setInterval(() => {
-        if (!video.paused && !isProcessing) {
-            processFrame();
+        if (!isProcessing) {
+            processFrame(); // Analyze continuously, even if video is paused
         }
     }, ANALYSIS_INTERVAL);
 }
@@ -289,11 +288,11 @@ function stopAutoAnalysis() {
 pauseBtn.addEventListener('click', () => {
     if (video.paused) {
         video.play();
-        pauseBtn.textContent = '⏸️ Pause';
+        pauseBtn.textContent = 'Pause';
         if (autoAnalyze) startAutoAnalysis();
     } else {
         video.pause();
-        pauseBtn.textContent = '▶️ Play';
+        pauseBtn.textContent = 'Play';
         stopAutoAnalysis();
     }
 });
