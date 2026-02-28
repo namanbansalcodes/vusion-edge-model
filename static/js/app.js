@@ -6,10 +6,66 @@ const pauseBtn = document.getElementById('pauseBtn');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const statusIndicator = document.getElementById('status-indicator');
 const statusText = document.getElementById('status-text');
+const prevVideoBtn = document.getElementById('prevVideoBtn');
+const nextVideoBtn = document.getElementById('nextVideoBtn');
+const videoName = document.getElementById('videoName');
+const videoCounter = document.getElementById('videoCounter');
 
 let isProcessing = false;
 let autoAnalyze = true;
 const ANALYSIS_INTERVAL = 3000; // Analyze every 3 seconds
+
+// Video playlist management
+let currentVideoIndex = 0;
+const videoList = window.VIDEO_LIST || [];
+
+// Initialize video navigation
+function updateVideoNavigation() {
+    // Update counter
+    if (videoList.length > 0) {
+        videoCounter.textContent = `${currentVideoIndex + 1} / ${videoList.length}`;
+        videoName.textContent = videoList[currentVideoIndex].name;
+    } else {
+        videoCounter.textContent = '0 / 0';
+        videoName.textContent = 'No videos available';
+    }
+
+    // Disable/enable navigation buttons
+    prevVideoBtn.disabled = videoList.length <= 1;
+    nextVideoBtn.disabled = videoList.length <= 1;
+}
+
+// Switch to a specific video
+function switchVideo(index) {
+    if (videoList.length === 0) return;
+
+    // Ensure index is within bounds
+    currentVideoIndex = ((index % videoList.length) + videoList.length) % videoList.length;
+
+    const wasPlaying = !video.paused;
+    const videoSource = document.getElementById('videoSource');
+
+    // Update video source
+    videoSource.src = videoList[currentVideoIndex].url;
+    video.load();
+
+    // Resume playing if it was playing before
+    if (wasPlaying) {
+        video.play();
+    }
+
+    updateVideoNavigation();
+}
+
+// Navigate to previous video
+function previousVideo() {
+    switchVideo(currentVideoIndex - 1);
+}
+
+// Navigate to next video
+function nextVideo() {
+    switchVideo(currentVideoIndex + 1);
+}
 
 // Check model status on load
 async function checkModelStatus() {
@@ -246,12 +302,33 @@ analyzeBtn.addEventListener('click', () => {
     processFrame();
 });
 
+// Video navigation event listeners
+prevVideoBtn.addEventListener('click', previousVideo);
+nextVideoBtn.addEventListener('click', nextVideo);
+
+// Keyboard navigation (left/right arrows)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+        previousVideo();
+    } else if (e.key === 'ArrowRight') {
+        nextVideo();
+    }
+});
+
 // Initialize on load
 window.addEventListener('load', () => {
     checkModelStatus();
+
+    // Initialize video navigation
+    updateVideoNavigation();
 
     // Wait for video metadata to load
     video.addEventListener('loadedmetadata', () => {
         console.log('Video loaded:', video.videoWidth, 'x', video.videoHeight);
     });
+
+    // Ensure video loops
+    video.loop = true;
+
+    console.log(`Loaded ${videoList.length} video(s)`);
 });

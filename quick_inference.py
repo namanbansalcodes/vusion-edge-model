@@ -10,6 +10,7 @@ import sys
 
 MODEL_ID = "google/paligemma-3b-pt-224"
 
+
 def run_inference(image_path, prompt="describe this image"):
     print("Loading base model from cache...")
 
@@ -18,7 +19,7 @@ def run_inference(image_path, prompt="describe this image"):
         MODEL_ID,
         torch_dtype=torch.float16,
         device_map="mps",  # KEY: Load directly to Metal GPU
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True,
     )
 
     print(f"✓ Model loaded on {model.device}")
@@ -39,6 +40,7 @@ def run_inference(image_path, prompt="describe this image"):
     result = processor.decode(outputs[0], skip_special_tokens=True)
     print(f"\n🤖 {result}\n")
     return result
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

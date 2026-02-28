@@ -69,7 +69,7 @@ class StockOutDataset(Dataset):
         # Labels: only compute loss on the answer portion (token_type_ids == 1)
         labels = input_ids.clone()
         labels[token_type_ids == 0] = -100  # mask prompt + image tokens
-        labels[attention_mask == 0] = -100   # mask padding
+        labels[attention_mask == 0] = -100  # mask padding
 
         return {
             "input_ids": input_ids,
@@ -90,7 +90,9 @@ def load_and_split(jsonl_path):
     split_idx = int(len(all_samples) * (1 - VAL_SPLIT))
     train_samples = all_samples[:split_idx]
     val_samples = all_samples[split_idx:]
-    print(f"Dataset: {len(all_samples)} total → {len(train_samples)} train, {len(val_samples)} val")
+    print(
+        f"Dataset: {len(all_samples)} total → {len(train_samples)} train, {len(val_samples)} val"
+    )
     return train_samples, val_samples
 
 
@@ -98,9 +100,15 @@ def evaluate(model, processor, val_samples, img_dir):
     """Evaluate on val set: zone-level precision/recall/F1 + exact match."""
     model.eval()
     all_zones = [
-        "top-left", "top-center", "top-right",
-        "middle-left", "middle-center", "middle-right",
-        "bottom-left", "bottom-center", "bottom-right",
+        "top-left",
+        "top-center",
+        "top-right",
+        "middle-left",
+        "middle-center",
+        "middle-right",
+        "bottom-left",
+        "bottom-center",
+        "bottom-right",
     ]
 
     tp, fp, fn = 0, 0, 0
@@ -109,7 +117,9 @@ def evaluate(model, processor, val_samples, img_dir):
 
     for sample in val_samples:
         image = Image.open(os.path.join(img_dir, sample["image"])).convert("RGB")
-        inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(DEVICE)
+        inputs = processor(
+            text="detect stock out", images=image, return_tensors="pt"
+        ).to(DEVICE)
 
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=128)
@@ -136,7 +146,9 @@ def evaluate(model, processor, val_samples, img_dir):
 
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    f1 = (
+        2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    )
     em_rate = exact_match / total if total > 0 else 0
 
     print(f"\n{'='*50}")
@@ -206,7 +218,9 @@ def main():
             total_loss += loss.item()
             if step % 10 == 0:
                 lr = scheduler.get_last_lr()[0]
-                print(f"  Epoch {epoch+1}/{EPOCHS} | Step {step}/{len(train_loader)} | Loss: {loss.item():.4f} | LR: {lr:.2e}")
+                print(
+                    f"  Epoch {epoch+1}/{EPOCHS} | Step {step}/{len(train_loader)} | Loss: {loss.item():.4f} | LR: {lr:.2e}"
+                )
 
         avg_loss = total_loss / len(train_loader)
         print(f"Epoch {epoch+1}/{EPOCHS} done — avg loss: {avg_loss:.4f}")
@@ -225,7 +239,9 @@ def main():
     model.eval()
     for i, sample in enumerate(val_samples[:5]):
         image = Image.open(os.path.join(IMG_DIR, sample["image"])).convert("RGB")
-        inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(DEVICE)
+        inputs = processor(
+            text="detect stock out", images=image, return_tensors="pt"
+        ).to(DEVICE)
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=128)
         decoded = processor.decode(output[0], skip_special_tokens=True)

@@ -37,9 +37,15 @@ VAL_SPLIT = 0.15
 SEED = 42
 
 ALL_ZONES = [
-    "top-left", "top-center", "top-right",
-    "middle-left", "middle-center", "middle-right",
-    "bottom-left", "bottom-center", "bottom-right",
+    "top-left",
+    "top-center",
+    "top-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
 ]
 
 
@@ -93,7 +99,9 @@ def load_data():
     split_idx = int(len(all_samples) * (1 - VAL_SPLIT))
     train_samples = all_samples[:split_idx]
     val_samples = all_samples[split_idx:]
-    print(f"Dataset: {len(all_samples)} total -> {len(train_samples)} train, {len(val_samples)} val")
+    print(
+        f"Dataset: {len(all_samples)} total -> {len(train_samples)} train, {len(val_samples)} val"
+    )
     return train_samples, val_samples
 
 
@@ -124,7 +132,9 @@ def do_train(model, processor, train_samples, epochs=5, lr=LR):
             total_loss += loss.item()
             if step % 10 == 0:
                 lr_now = scheduler.get_last_lr()[0]
-                print(f"  Epoch {epoch+1}/{epochs} | Step {step}/{len(loader)} | Loss: {loss.item():.4f} | LR: {lr_now:.2e}")
+                print(
+                    f"  Epoch {epoch+1}/{epochs} | Step {step}/{len(loader)} | Loss: {loss.item():.4f} | LR: {lr_now:.2e}"
+                )
 
         avg = total_loss / len(loader)
         print(f"Epoch {epoch+1}/{epochs} done -- avg loss: {avg:.4f}")
@@ -140,7 +150,9 @@ def do_eval(model, processor, val_samples):
 
     for i, sample in enumerate(val_samples):
         image = Image.open(os.path.join(IMG_DIR, sample["image"])).convert("RGB")
-        inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(DEVICE)
+        inputs = processor(
+            text="detect stock out", images=image, return_tensors="pt"
+        ).to(DEVICE)
 
         with torch.no_grad():
             output = model.generate(**inputs, max_new_tokens=128)
@@ -163,7 +175,9 @@ def do_eval(model, processor, val_samples):
 
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    f1 = (
+        2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+    )
     em_rate = exact_match / total if total > 0 else 0
 
     print(f"\n{'='*50}")
@@ -179,7 +193,9 @@ def do_eval(model, processor, val_samples):
 def do_infer(model, processor, img_path):
     model.eval()
     image = Image.open(img_path).convert("RGB")
-    inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(DEVICE)
+    inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(
+        DEVICE
+    )
     with torch.no_grad():
         output = model.generate(**inputs, max_new_tokens=128)
     decoded = processor.decode(output[0], skip_special_tokens=True)
@@ -201,7 +217,8 @@ def main():
 
     processor = PaliGemmaProcessor.from_pretrained(MODEL_ID)
     model = PaliGemmaForConditionalGeneration.from_pretrained(
-        MODEL_ID, torch_dtype=torch.bfloat16,
+        MODEL_ID,
+        torch_dtype=torch.bfloat16,
     )
 
     lora_config = LoraConfig(
@@ -218,7 +235,9 @@ def main():
 
     train_samples, val_samples = load_data()
 
-    print("\nModel loaded and ready! Commands: train [epochs] [lr], eval, infer <img>, save, reload, quit")
+    print(
+        "\nModel loaded and ready! Commands: train [epochs] [lr], eval, infer <img>, save, reload, quit"
+    )
 
     while True:
         try:

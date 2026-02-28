@@ -24,18 +24,40 @@
             <!-- Video Feed Section -->
             <section class="video-section">
                 <h2>📹 Live Shelf Camera Feed</h2>
-                <div class="video-container">
-                    <video id="shelfVideo" autoplay loop muted playsinline>
-                        <source src="{% static 'videos/shelf_demo.mp4' %}" type="video/mp4">
-                        Your browser does not support video playback.
-                    </video>
-                    <canvas id="frameCanvas" style="display:none;"></canvas>
+                <div class="video-wrapper">
+                    <button id="prevVideoBtn" class="nav-btn nav-btn-left">◀</button>
+                    <div class="video-container">
+                        <video id="shelfVideo" autoplay loop muted playsinline>
+                            {% if videos %}
+                                <source src="{{ videos.0.url }}" type="video/mp4" id="videoSource">
+                            {% endif %}
+                            Your browser does not support video playback.
+                        </video>
+                        <canvas id="frameCanvas" style="display:none;"></canvas>
+                        <div class="video-info">
+                            <span id="videoName">{% if videos %}{{ videos.0.name }}{% else %}No videos{% endif %}</span>
+                            <span id="videoCounter">{% if videos %}1 / {{ video_count }}{% else %}0 / 0{% endif %}</span>
+                        </div>
+                    </div>
+                    <button id="nextVideoBtn" class="nav-btn nav-btn-right">▶</button>
                 </div>
                 <div class="video-controls">
                     <button id="pauseBtn" class="btn btn-primary">⏸️ Pause</button>
                     <button id="analyzeBtn" class="btn btn-success">🔍 Analyze Current Frame</button>
                 </div>
             </section>
+
+            <!-- Hidden video data -->
+            <script>
+                window.VIDEO_LIST = [
+                    {% for video in videos %}
+                    {
+                        name: "{{ video.name|escapejs }}",
+                        url: "{{ video.url|escapejs }}"
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ];
+            </script>
 
             <!-- ML Pipeline Workflow -->
             <section class="pipeline-section">

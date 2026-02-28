@@ -43,9 +43,16 @@ print("[4/4] Running inference...")
 
 # Test image
 import sys
-img_path = sys.argv[1] if len(sys.argv) > 1 else "paligemma_dataset/images/00d4450e-2571-4055-906f-d9236333fc0b_jpg.rf.Xeuw6FUd8ZmXLxT78ibW.jpg"
+
+img_path = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "paligemma_dataset/images/00d4450e-2571-4055-906f-d9236333fc0b_jpg.rf.Xeuw6FUd8ZmXLxT78ibW.jpg"
+)
 image = Image.open(img_path).convert("RGB")
-inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(DEVICE)
+inputs = processor(text="detect stock out", images=image, return_tensors="pt").to(
+    DEVICE
+)
 
 with torch.no_grad():
     output = model.generate(**inputs, max_new_tokens=128)
@@ -54,9 +61,15 @@ decoded = processor.decode(output[0], skip_special_tokens=True)
 
 # Display results
 ALL_ZONES = [
-    "top-left", "top-center", "top-right",
-    "middle-left", "middle-center", "middle-right",
-    "bottom-left", "bottom-center", "bottom-right",
+    "top-left",
+    "top-center",
+    "top-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
 ]
 detected = [z for z in ALL_ZONES if z in decoded]
 

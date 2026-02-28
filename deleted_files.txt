@@ -1,0 +1,40 @@
+# Files deleted on Sat Feb 28 14:39:24 PST 2026
+
+## Large Model (5.5GB saved)
+paligemma-keras-pali_gemma_3b_224-v4/
+
+## Duplicate/Test Inference Scripts
+fast_inference.py
+inference_local.py
+inference.py
+quick_finetuned_inference.py
+quick_inference.py
+run_local.py
+test_paligemma_4bit.py
+test_paligemma_inference.py
+
+## VM Automation Scripts (32 files)
+vm_check_size.sh
+vm_check.sh
+vm_download_adapter.sh
+vm_download_model.sh
+vm_fix_and_train.sh
+vm_infer.sh
+vm_prep_keras.sh
+vm_quick_inference.sh
+vm_quick_test.sh
+vm_run_train.sh
+vm_run_v2.sh
+vm_setup_and_train.sh
+vm_start_server.sh
+vm_test_specific_images.sh
+vm_train.sh
+vm_train2.sh
+vm_upload_model.sh
+vm_upload_script.sh
+vm_upload.sh
+
+## Utility Scripts
+monitor_inference.sh
+setup_local.sh
+analyze_dataset.py

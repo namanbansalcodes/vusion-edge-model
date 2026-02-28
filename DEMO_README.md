@@ -29,13 +29,17 @@ pip install django pillow
 
 ### 3. Add Demo Videos
 
-Place your shelf videos in `static/videos/`:
+Place your shelf videos in `media/videos/`:
 
 ```bash
-mkdir -p static/videos
-# Copy your demo video as shelf_demo.mp4
-cp /path/to/your/video.mp4 static/videos/shelf_demo.mp4
+mkdir -p media/videos
+# Copy all your demo videos (any name, any supported format)
+cp /path/to/your/videos/*.mp4 media/videos/
 ```
+
+**Supported formats:** MP4, AVI, MOV, WEBM, MKV
+
+The app will automatically discover and display all videos in the folder!
 
 ### 4. Run the Demo
 
@@ -170,7 +174,11 @@ The workflow in `detector/views.py` has placeholders for Gemma integration:
 
 ## 🎨 UI Features
 
-- **Real-time video playback** with looping shelf footage
+- **Auto-discovery** of all videos in `media/videos/` folder
+- **Video navigation** with ◀ ▶ buttons and arrow key support
+- **Auto-looping** videos for continuous playback
+- **Video counter** showing current video (e.g., "2 / 5")
+- **Real-time video playback** with shelf footage
 - **Auto-analysis** every 3 seconds
 - **Manual analysis** button for on-demand detection
 - **Workflow visualization** with color-coded steps

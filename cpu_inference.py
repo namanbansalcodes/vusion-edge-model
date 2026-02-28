@@ -33,7 +33,11 @@ model = PeftModel.from_pretrained(base_model, "paligemma_stockout_model")
 model.eval()
 
 # Get image
-img_path = sys.argv[1] if len(sys.argv) > 1 else "paligemma_dataset/images/00d4450e-2571-4055-906f-d9236333fc0b_jpg.rf.Xeuw6FUd8ZmXLxT78ibW.jpg"
+img_path = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "paligemma_dataset/images/00d4450e-2571-4055-906f-d9236333fc0b_jpg.rf.Xeuw6FUd8ZmXLxT78ibW.jpg"
+)
 
 print(f"\n[Running] {img_path.split('/')[-1][:50]}...")
 image = Image.open(img_path).convert("RGB")
@@ -47,9 +51,15 @@ decoded = processor.decode(output[0], skip_special_tokens=True)
 
 # Parse
 ALL_ZONES = [
-    "top-left", "top-center", "top-right",
-    "middle-left", "middle-center", "middle-right",
-    "bottom-left", "bottom-center", "bottom-right",
+    "top-left",
+    "top-center",
+    "top-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
 ]
 detected = [z for z in ALL_ZONES if z in decoded]
 

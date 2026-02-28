@@ -15,10 +15,17 @@ ADAPTER_DIR = "paligemma_stockout_model"
 
 # Zone definitions
 ALL_ZONES = [
-    "top-left", "top-center", "top-right",
-    "middle-left", "middle-center", "middle-right",
-    "bottom-left", "bottom-center", "bottom-right",
+    "top-left",
+    "top-center",
+    "top-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
 ]
+
 
 def run_inference(image_path, prompt="detect stock out"):
     print("Loading fine-tuned model...")
@@ -32,7 +39,7 @@ def run_inference(image_path, prompt="detect stock out"):
         BASE_MODEL_ID,
         torch_dtype=torch.float16,
         device_map="mps",  # Apple Metal for M3
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True,
     )
 
     # Load fine-tuned adapter
@@ -66,6 +73,7 @@ def run_inference(image_path, prompt="detect stock out"):
         print("📍 No stock-out zones detected")
 
     return result
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

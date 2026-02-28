@@ -19,7 +19,30 @@ from detector.inference_utils import detect_stockouts
 
 def index(request):
     """Main demo page"""
-    return render(request, 'detector/index.html')
+    # Discover all videos in the media/videos directory
+    import os
+    from django.conf import settings
+
+    videos_dir = settings.MEDIA_ROOT / 'videos'
+    video_files = []
+
+    if videos_dir.exists():
+        # Get all video files
+        video_extensions = ['.mp4', '.avi', '.mov', '.webm', '.mkv']
+        for filename in os.listdir(videos_dir):
+            if any(filename.lower().endswith(ext) for ext in video_extensions):
+                video_files.append({
+                    'name': filename,
+                    'url': f"{settings.MEDIA_URL}videos/{filename}"
+                })
+
+    # Sort by filename
+    video_files.sort(key=lambda x: x['name'])
+
+    return render(request, 'detector/index.html', {
+        'videos': video_files,
+        'video_count': len(video_files)
+    })
 
 
 @csrf_exempt

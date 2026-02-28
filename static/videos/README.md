@@ -1,38 +1,37 @@
-# Demo Videos
+# ⚠️ DEPRECATED: Use `media/videos/` instead
 
-Place your shelf camera demo videos here.
+This directory is no longer used for demo videos.
 
-## Required Video
+## New Location
 
-**Filename:** `shelf_demo.mp4`
+**Place all demo videos in:** `media/videos/`
 
-This video will loop in the demo interface. It should show:
-- Retail shelf with products
-- Clear view of stock levels
-- Some areas with stock-outs (empty spaces)
+The app now automatically discovers ALL videos in `media/videos/` - no specific filename required!
 
-## Recommended Specs
-
-- **Format:** MP4 (H.264 codec)
-- **Resolution:** 1920x1080 or 1280x720
-- **Duration:** 10-30 seconds (will loop)
-- **Frame rate:** 24-30 fps
-- **File size:** < 50MB
-
-## How to Add
+## How to Add Videos
 
 ```bash
-# Copy your video to this directory
-cp /path/to/your/shelf/video.mp4 static/videos/shelf_demo.mp4
+# Create the directory
+mkdir -p media/videos
+
+# Copy ALL your videos (any filename works!)
+cp /path/to/your/videos/*.mp4 media/videos/
 ```
 
-## Sample Videos
+## Supported Formats
 
-If you don't have a video yet, you can:
-1. Use your phone to record a shelf at a grocery store
-2. Download stock footage from free stock video sites
-3. Use a placeholder video for testing
+- MP4 (recommended)
+- AVI
+- MOV
+- WEBM
+- MKV
 
-## Note
+## Features
 
-Videos are excluded from git (see .gitignore) to keep the repository lightweight.
+- ✅ Auto-discovery of all videos
+- ✅ Navigate with ◀ ▶ buttons
+- ✅ Keyboard arrow key support
+- ✅ Auto-looping playback
+- ✅ Video counter (e.g., "2 / 5")
+
+See `DEMO_README.md` for full documentation.

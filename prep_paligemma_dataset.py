@@ -66,13 +66,15 @@ def main():
         if os.path.exists(src):
             shutil.copy2(src, dst)
 
-        entries.append({
-            "image": fname,
-            "prompt": PROMPT,
-            "response": response,
-            "num_stockouts": len(anns),
-            "zones": zones if anns else [],
-        })
+        entries.append(
+            {
+                "image": fname,
+                "prompt": PROMPT,
+                "response": response,
+                "num_stockouts": len(anns),
+                "zones": zones if anns else [],
+            }
+        )
 
     # Write JSONL
     with open(OUT_JSONL, "w") as f:
@@ -85,6 +87,7 @@ def main():
 
     # Quick stats
     from collections import Counter
+
     zone_counts = Counter()
     for e in entries:
         for z in e["zones"]:
