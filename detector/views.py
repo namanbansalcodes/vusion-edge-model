@@ -85,10 +85,13 @@ def process_frame(request):
                     'detected_zones': paligemma_result['detected_zones'],
                     'zone_count': len(paligemma_result['detected_zones']),
                     'has_stockout': len(paligemma_result['detected_zones']) > 0,
+                    'commentary': paligemma_result['commentary'],
+                    'commentary_raw': paligemma_result.get('commentary_raw', ''),
                     'logs': [
                         f"Analyzed frame",
-                        f"Detected {len(paligemma_result['detected_zones'])} stock-out zones",
-                        f"Zones: {', '.join(paligemma_result['detected_zones']) if paligemma_result['detected_zones'] else 'none'}"
+                        f"Stock-outs: {len(paligemma_result['detected_zones'])} zones",
+                        f"Zones: {', '.join(paligemma_result['detected_zones']) if paligemma_result['detected_zones'] else 'none'}",
+                        f"Observations: {paligemma_result['commentary']}"
                     ]
                 },
 

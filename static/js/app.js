@@ -180,28 +180,43 @@ function updatePaliGemmaStep(data) {
 
     const outputDiv = document.getElementById('paligemma-output');
 
+    // Build output with stock-outs and commentary
+    let outputHTML = '';
+
+    // Stock-out detection
     if (data.detected_zones.length > 0) {
         const zones = data.detected_zones.map(zone =>
             `<span class="zone-badge">${zone}</span>`
         ).join('');
 
-        outputDiv.innerHTML = `
-            <div style="margin-bottom: 10px;">
-                <strong>Stock-out detected!</strong> (${data.zone_count} zones)
+        outputHTML += `
+            <div style="margin-bottom: 12px;">
+                <strong style="color: #ff4444;">⚠️ Stock-out detected</strong> (${data.zone_count} zones)
             </div>
-            <div>${zones}</div>
+            <div style="margin-bottom: 12px;">${zones}</div>
         `;
 
-        // Highlight this step
         document.getElementById('step-paligemma').classList.add('active');
     } else {
-        outputDiv.innerHTML = `
-            <div style="color: #0f0;">
-                No stock-outs detected
+        outputHTML += `
+            <div style="margin-bottom: 12px;">
+                <strong style="color: #00ff00;">✓ No stock-outs</strong>
             </div>
         `;
         document.getElementById('step-paligemma').classList.remove('active');
     }
+
+    // Shelf commentary
+    if (data.commentary) {
+        outputHTML += `
+            <div style="border-top: 1px solid #333; padding-top: 8px; margin-top: 8px; color: #999;">
+                <strong style="color: #ccc;">Shelf Observations:</strong><br>
+                <span style="font-size: 0.9em;">${data.commentary}</span>
+            </div>
+        `;
+    }
+
+    outputDiv.innerHTML = outputHTML;
 }
 
 // Update Gemma step UI

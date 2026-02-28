@@ -74,25 +74,65 @@ def detect_stockouts(image, prompt="detect stock out"):
         dict with keys:
             - raw_output: Full model output
             - detected_zones: List of detected zone names
+            - commentary: General shelf observations
     """
     # Load model if not already loaded
     model, processor = load_model()
 
-    # Process image
+    # === DETECTION: Check for stock-outs ===
     inputs = processor(text=prompt, images=image, return_tensors="pt")
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
-    # Generate
     with torch.no_grad():
         outputs = model.generate(**inputs, max_new_tokens=128)
 
-    # Decode
-    raw_output = processor.decode(outputs[0], skip_special_tokens=True)
+    detection_output = processor.decode(outputs[0], skip_special_tokens=True)
 
-    # Parse detected zones
-    detected_zones = [zone for zone in ALL_ZONES if zone in raw_output]
+    # Parse detected zones (more conservative - only if explicitly mentioned)
+    detected_zones = []
+    output_lower = detection_output.lower()
+    for zone in ALL_ZONES:
+        # Only count if zone is clearly mentioned with context
+        if zone in output_lower and ("stock" in output_lower or "empty" in output_lower):
+            detected_zones.append(zone)
+
+    # === COMMENTARY: General shelf observations ===
+    commentary_prompt = "describe the shelf condition and organization"
+    commentary_inputs = processor(text=commentary_prompt, images=image, return_tensors="pt")
+    commentary_inputs = {k: v.to(model.device) for k, v in commentary_inputs.items()}
+
+    with torch.no_grad():
+        commentary_outputs = model.generate(**commentary_inputs, max_new_tokens=100)
+
+    commentary = processor.decode(commentary_outputs[0], skip_special_tokens=True)
+
+    # Generate human-readable commentary
+    shelf_comments = []
+    commentary_lower = commentary.lower()
+
+    # Check for tidiness
+    if any(word in commentary_lower for word in ['tidy', 'organized', 'neat', 'well-arranged']):
+        shelf_comments.append("Shelf is well-organized")
+    elif any(word in commentary_lower for word in ['messy', 'disorganized', 'cluttered']):
+        shelf_comments.append("Shelf appears disorganized")
+
+    # Check for falling items
+    if any(word in commentary_lower for word in ['falling', 'tipping', 'leaning', 'unstable']):
+        shelf_comments.append("Some items may be unstable")
+
+    # Check for fullness
+    if any(word in commentary_lower for word in ['full', 'stocked', 'plenty']):
+        shelf_comments.append("Shelf is well-stocked")
+    elif any(word in commentary_lower for word in ['sparse', 'few', 'limited']):
+        shelf_comments.append("Low stock levels observed")
+
+    # Default if no specific observations
+    if not shelf_comments:
+        shelf_comments.append("Shelf condition appears normal")
 
     return {
-        'raw_output': raw_output,
-        'detected_zones': detected_zones
+        'raw_output': detection_output,
+        'detected_zones': detected_zones,
+        'commentary': ' • '.join(shelf_comments),
+        'commentary_raw': commentary
     }
