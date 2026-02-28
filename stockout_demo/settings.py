@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "detector",  # Stock-out detection app
+    "detector.apps.DetectorConfig",  # Stock-out detection app (with auto-load)
 ]
 
 MIDDLEWARE = [
