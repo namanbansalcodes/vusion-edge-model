@@ -69,23 +69,30 @@ function nextVideo() {
 
 // Check model status on load
 async function checkModelStatus() {
+    console.log('Checking model status...');
     try {
         const response = await fetch('/api/model-status/');
         const data = await response.json();
+        console.log('Model status:', data);
 
         if (data.loaded) {
             statusIndicator.className = 'status-ready';
             statusText.textContent = 'Model ready';
             analyzeBtn.disabled = false;
 
+            console.log('Model ready! Starting continuous analysis...');
             // Start continuous analysis immediately
             if (autoAnalyze) {
-                processFrame(); // Immediate first analysis
+                setTimeout(() => {
+                    console.log('Triggering first frame analysis...');
+                    processFrame(); // Immediate first analysis
+                }, 1000); // Wait 1 second for video to be ready
                 startAutoAnalysis(); // Then continue every 2 seconds
             }
         } else {
             statusIndicator.className = 'status-loading';
             statusText.textContent = 'Loading model';
+            console.log('Model not ready, retrying in 2 seconds...');
             setTimeout(checkModelStatus, 2000);
         }
     } catch (error) {
@@ -106,20 +113,28 @@ function captureFrame() {
 
 // Process a frame through the ML pipeline
 async function processFrame() {
-    if (isProcessing) return;
+    console.log('processFrame called, isProcessing:', isProcessing);
+    if (isProcessing) {
+        console.log('Already processing, skipping...');
+        return;
+    }
 
     isProcessing = true;
     analyzeBtn.disabled = true;
     analyzeBtn.textContent = 'Processing...';
 
     try {
+        console.log('Starting frame analysis...');
         updateStepStatus('paligemma', 'processing');
         updateLogs('paligemma', ['Capturing frame', 'Running detection']);
 
         // Capture frame
+        console.log('Capturing video frame...');
         const frameData = captureFrame();
+        console.log('Frame captured, size:', frameData.length);
 
         // Send to backend
+        console.log('Sending frame to backend API...');
         const response = await fetch('/api/process-frame/', {
             method: 'POST',
             headers: {
@@ -128,9 +143,12 @@ async function processFrame() {
             body: JSON.stringify({ image: frameData })
         });
 
+        console.log('Backend response status:', response.status);
         const result = await response.json();
+        console.log('Backend result:', result);
 
         if (result.success) {
+            console.log('Analysis successful!');
             // Update PaliGemma step
             updatePaliGemmaStep(result.steps.paligemma);
 
@@ -271,11 +289,16 @@ function updateLogs(step, logs) {
 // Auto-analysis loop - runs continuously
 let autoAnalysisInterval;
 function startAutoAnalysis() {
+    console.log(`Starting auto-analysis loop (every ${ANALYSIS_INTERVAL}ms)`);
     autoAnalysisInterval = setInterval(() => {
+        console.log('Auto-analysis tick, isProcessing:', isProcessing);
         if (!isProcessing) {
             processFrame(); // Analyze continuously, even if video is paused
+        } else {
+            console.log('Skipping analysis - already processing');
         }
     }, ANALYSIS_INTERVAL);
+    console.log('Auto-analysis loop started');
 }
 
 function stopAutoAnalysis() {
@@ -316,18 +339,23 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize on load
 window.addEventListener('load', () => {
-    checkModelStatus();
+    console.log('Page loaded, initializing...');
+    console.log(`Video list: ${videoList.length} video(s)`);
 
     // Initialize video navigation
     updateVideoNavigation();
 
+    // Ensure video loops and autoplays
+    video.loop = true;
+    video.muted = true;
+
     // Wait for video metadata to load
     video.addEventListener('loadedmetadata', () => {
-        console.log('Video loaded:', video.videoWidth, 'x', video.videoHeight);
+        console.log('Video metadata loaded:', video.videoWidth, 'x', video.videoHeight);
+        console.log('Video ready state:', video.readyState);
     });
 
-    // Ensure video loops
-    video.loop = true;
-
-    console.log(`Loaded ${videoList.length} video(s)`);
+    // Start checking model status
+    console.log('Starting model status check...');
+    checkModelStatus();
 });
