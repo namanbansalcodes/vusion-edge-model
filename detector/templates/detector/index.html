@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Device Stock-Out Detection | Vusion Demo</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛒 On-Device Stock-Out Detection</h1>
+            <p class="tagline">GDPR-Compliant Edge AI for Retail</p>
+            <div class="model-status">
+                <span id="status-indicator" class="status-loading">●</span>
+                <span id="status-text">Loading PaliGemma...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Video Feed Section -->
+            <section class="video-section">
+                <h2>📹 Live Shelf Camera Feed</h2>
+                <div class="video-container">
+                    <video id="shelfVideo" autoplay loop muted playsinline>
+                        <source src="{% static 'videos/shelf_demo.mp4' %}" type="video/mp4">
+                        Your browser does not support video playback.
+                    </video>
+                    <canvas id="frameCanvas" style="display:none;"></canvas>
+                </div>
+                <div class="video-controls">
+                    <button id="pauseBtn" class="btn btn-primary">⏸️ Pause</button>
+                    <button id="analyzeBtn" class="btn btn-success">🔍 Analyze Current Frame</button>
+                </div>
+            </section>
+
+            <!-- ML Pipeline Workflow -->
+            <section class="pipeline-section">
+                <h2>🤖 ML Pipeline Workflow</h2>
+
+                <div class="workflow">
+                    <!-- Step 1: PaliGemma -->
+                    <div class="workflow-step" id="step-paligemma">
+                        <div class="step-icon">
+                            <div class="icon paligemma-icon">🔍</div>
+                            <div class="step-label">PaliGemma</div>
+                            <div class="step-status" id="paligemma-status">Ready</div>
+                        </div>
+                        <div class="step-logs">
+                            <h4>Logs:</h4>
+                            <div class="log-output" id="paligemma-logs">
+                                <p class="log-entry">Waiting for frame...</p>
+                            </div>
+                        </div>
+                        <div class="step-output">
+                            <h4>Output:</h4>
+                            <div class="output-box" id="paligemma-output">
+                                <span class="placeholder">No analysis yet</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <!-- Step 2: Gemma (Teammate's Integration) -->
+                    <div class="workflow-step" id="step-gemma">
+                        <div class="step-icon">
+                            <div class="icon gemma-icon">💬</div>
+                            <div class="step-label">Gemma LLM</div>
+                            <div class="step-status" id="gemma-status">Waiting</div>
+                        </div>
+                        <div class="step-logs">
+                            <h4>Logs:</h4>
+                            <div class="log-output" id="gemma-logs">
+                                <p class="log-entry">Pending PaliGemma detection...</p>
+                                <p class="log-note">⚠️ Integration in progress (teammate)</p>
+                            </div>
+                        </div>
+                        <div class="step-output">
+                            <h4>Output:</h4>
+                            <div class="output-box" id="gemma-output">
+                                <span class="placeholder">Waiting for stock-out detection...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-arrow">→</div>
+
+                    <!-- Step 3: Function Calls -->
+                    <div class="workflow-step" id="step-functions">
+                        <div class="step-icon">
+                            <div class="icon functions-icon">⚡</div>
+                            <div class="step-label">Tool Calls</div>
+                            <div class="step-status" id="functions-status">Waiting</div>
+                        </div>
+                        <div class="step-logs">
+                            <h4>Logs:</h4>
+                            <div class="log-output" id="functions-logs">
+                                <p class="log-entry">Pending Gemma output...</p>
+                            </div>
+                        </div>
+                        <div class="step-output">
+                            <h4>Output:</h4>
+                            <div class="output-box" id="functions-output">
+                                <span class="placeholder">No function calls yet</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>💡 <strong>The Problem:</strong> Stock-outs cost retailers billions. <strong>Our Solution:</strong> On-device AI that respects GDPR.</p>
+            <p class="tech-stack">Powered by PaliGemma 3B + Gemma + LoRA | Running 100% on-device</p>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

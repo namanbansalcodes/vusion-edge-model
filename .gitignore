@@ -26,6 +26,7 @@ paligemma_stockout_model/
 
 # Dataset
 paligemma_dataset/
+Empty Spaces Detection in Shelf Data.coco/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -56,3 +57,14 @@ training_logs.md
 # Cache
 .cache/
 *.cache
+
+# Django
+db.sqlite3
+*.sqlite3
+__pycache__/
+*.pyc
+migrations/__pycache__/
+staticfiles/
+media/videos/*.mp4
+media/videos/*.avi
+media/videos/*.mov
