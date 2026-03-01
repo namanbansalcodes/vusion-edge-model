@@ -128,26 +128,34 @@ body {
 
 .camera-marker {
     position: absolute;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border: 2px solid #000;
+    width: 14px;
+    height: 14px;
+    background: #3b82f6;
+    border: 2px solid #fff;
     border-radius: 50%;
     cursor: pointer;
     pointer-events: all;
     transition: all 0.15s ease;
     transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 2px #000;
 }
 
 .camera-marker:hover {
-    width: 16px;
-    height: 16px;
-    background: #0f0;
+    width: 18px;
+    height: 18px;
+    background: #60a5fa;
+    box-shadow: 0 0 0 2px #000, 0 0 12px #3b82f6;
 }
 
 .camera-marker.active {
     background: #0f0;
-    box-shadow: 0 0 8px #0f0;
+    box-shadow: 0 0 0 2px #000, 0 0 16px #0f0;
+    animation: pulse-marker 2s infinite;
+}
+
+@keyframes pulse-marker {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); }
 }
 
 .video-wrapper {

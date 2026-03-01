@@ -239,7 +239,7 @@ function updatePaliGemmaStep(data) {
     outputDiv.innerHTML = outputHTML;
 }
 
-// Update Gemini step UI
+// Update Gemini step UI with live reasoning
 function updateGeminiStep(data) {
     updateStepStatus('gemini', data.status);
     updateLogs('gemini', data.logs);
@@ -248,7 +248,34 @@ function updateGeminiStep(data) {
 
     if (data.enabled) {
         if (data.output) {
-            outputDiv.innerHTML = `<div>${data.output}</div>`;
+            let reasoningHTML = '';
+
+            // Display live agent reasoning
+            if (data.reasoning && data.reasoning.length > 0) {
+                reasoningHTML = `
+                    <div style="background: #0a0f1a; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 3px solid #818cf8;">
+                        <div style="font-weight: 700; color: #818cf8; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            🧠 Agent Reasoning (Live)
+                        </div>
+                        <div style="font-family: monospace; font-size: 11px; line-height: 1.8; color: #e5e7eb;">
+                            ${data.reasoning.map((line, index) => `
+                                <div style="padding: 4px 0; opacity: 0; animation: fadeInUp 0.4s ease-out ${index * 0.15}s forwards;">
+                                    ${line}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Summary
+            const summaryHTML = `
+                <div style="padding: 10px; background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%); border-radius: 6px; color: #fff; font-weight: 600; font-size: 12px;">
+                    ${data.output}
+                </div>
+            `;
+
+            outputDiv.innerHTML = reasoningHTML + summaryHTML;
             document.getElementById('step-gemini').classList.add('active');
         } else {
             outputDiv.innerHTML = `
@@ -265,6 +292,25 @@ function updateGeminiStep(data) {
         `;
         document.getElementById('step-gemini').classList.remove('active');
     }
+}
+
+// Add fadeInUp animation
+if (!document.getElementById('agent-animations')) {
+    const style = document.createElement('style');
+    style.id = 'agent-animations';
+    style.textContent = `
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // Update Function Calls step UI - with animations and latest 5 only

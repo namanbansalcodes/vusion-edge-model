@@ -285,8 +285,16 @@ Take autonomous action using these tools in order:
 
 Process all {len(detected_zones)} zones and demonstrate autonomous decision-making."""
 
+        # Build agent reasoning log
+        reasoning_log = []
+        reasoning_log.append(f"📥 RECEIVED: Vision AI detected {len(detected_zones)} stock-out zones")
+        reasoning_log.append(f"🔍 ANALYZING: {', '.join(detected_zones)}")
+        reasoning_log.append(f"💭 CONTEXT: {pali_output[:100]}...")
+
         # Call Gemini
         print(f"[Gemini] Calling API for {len(detected_zones)} zones...")
+        reasoning_log.append(f"🤖 AGENT: Evaluating severity and determining action plan...")
+
         response = model.generate_content(prompt)
 
         # Extract tool calls
@@ -302,6 +310,17 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
                         tool_name = fc.name
                         tool_args = dict(fc.args)
 
+                        # Add reasoning for each tool call
+                        if tool_name == 'send_alert':
+                            alert_type = tool_args.get('alert_type', 'unknown')
+                            reasoning_log.append(f"⚡ DECISION: Sending {alert_type} alert for {tool_args.get('zone', 'unknown')}")
+                        elif tool_name == 'check_inventory':
+                            reasoning_log.append(f"📊 ACTION: Checking inventory levels for {tool_args.get('zone', 'unknown')}")
+                        elif tool_name == 'create_ticket':
+                            reasoning_log.append(f"🎫 ACTION: Creating {tool_args.get('priority', 'normal')} priority ticket")
+                        elif tool_name == 'assign_worker':
+                            reasoning_log.append(f"👷 ACTION: Assigning worker to {tool_args.get('zone', 'unknown')}")
+
                         # Mock execute tool (just print and return fake data)
                         print(f"[Mock] Executing {tool_name} with args: {tool_args}")
                         if tool_name in TOOL_EXECUTORS:
@@ -315,8 +334,12 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
                     elif hasattr(part, 'text'):
                         response_text += part.text
 
+        # Final reasoning
+        reasoning_log.append(f"✅ COMPLETE: Executed {len(tool_calls)} autonomous actions")
+        reasoning_log.append(f"📋 SUMMARY: Stock-out response workflow completed for {len(detected_zones)} zones")
+
         # Generate summary
-        summary = f"Gemini processed {len(detected_zones)} zones and suggested {len(tool_calls)} actions"
+        summary = f"Agent autonomously processed {len(detected_zones)} zones with {len(tool_calls)} actions"
         print(f"[Gemini] Complete! {len(tool_calls)} tool calls executed")
 
         return {
@@ -324,6 +347,7 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
             'zones_processed': len(detected_zones),
             'tool_calls': tool_calls,
             'summary': summary,
+            'reasoning': reasoning_log,  # Live agent reasoning
             'raw_response': response_text if response_text else f"Executed {len(tool_calls)} tool calls"
         }
 

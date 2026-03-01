@@ -139,6 +139,7 @@ def process_frame(request):
                         'enabled': True,
                         'logs': gemini_logs,
                         'output': gemini_result['summary'],
+                        'reasoning': gemini_result.get('reasoning', []),  # Live agent reasoning
                         'raw_response': gemini_result.get('raw_response', '')
                     }
 
