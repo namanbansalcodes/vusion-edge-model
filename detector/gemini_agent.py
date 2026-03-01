@@ -18,18 +18,32 @@ def configure_gemini():
 
 
 # Define tools using proper Gemini format
-lookup_camera = FunctionDeclaration(
-    name="lookup_camera",
-    description="Get camera details and location information",
+send_alert = FunctionDeclaration(
+    name="send_alert",
+    description="Send an alert to store manager or staff about stock issues",
     parameters={
         "type": "object",
         "properties": {
-            "camera_id": {
+            "alert_type": {
                 "type": "string",
-                "description": "Camera identifier (e.g., CAM-DEMO-01)"
+                "enum": ["stocking_needed", "escalate_to_manager", "urgent_restock", "vendor_order_needed"],
+                "description": "Type of alert to send"
+            },
+            "message": {
+                "type": "string",
+                "description": "Alert message content"
+            },
+            "zone": {
+                "type": "string",
+                "description": "Affected shelf zone"
+            },
+            "severity": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Alert severity level"
             }
         },
-        "required": ["camera_id"]
+        "required": ["alert_type", "message", "zone", "severity"]
     }
 )
 
@@ -126,7 +140,7 @@ send_notification = FunctionDeclaration(
 # Create tool object
 retail_tools = Tool(
     function_declarations=[
-        lookup_camera,
+        send_alert,
         check_inventory,
         create_ticket,
         assign_worker,
@@ -136,13 +150,27 @@ retail_tools = Tool(
 
 
 # Mock tool execution functions
-def execute_lookup_camera(camera_id: str) -> Dict:
-    """Mock camera lookup"""
+def execute_send_alert(alert_type: str, message: str, zone: str, severity: str) -> Dict:
+    """Mock alert sending - displays in UI as agent action"""
+    import random
+    alert_id = f"ALERT-{random.randint(1000, 9999)}"
+
+    # Map alert types to display messages
+    alert_messages = {
+        "stocking_needed": "🔔 STOCKING UP NEEDED",
+        "escalate_to_manager": "⚠️ ESCALATED TO MANAGER",
+        "urgent_restock": "🚨 URGENT RESTOCK REQUIRED",
+        "vendor_order_needed": "📦 VENDOR ORDER NEEDED"
+    }
+
     return {
-        "camera_id": camera_id,
-        "location": "Aisle 3, Section B",
-        "status": "active",
-        "last_maintenance": "2026-02-20"
+        "alert_id": alert_id,
+        "type": alert_messages.get(alert_type, alert_type),
+        "message": message,
+        "zone": zone,
+        "severity": severity.upper(),
+        "status": "sent",
+        "timestamp": "2026-02-28T10:30:00Z"
     }
 
 
@@ -199,7 +227,7 @@ def execute_send_notification(recipient: str, message: str, urgency: str) -> Dic
 
 # Tool execution router
 TOOL_EXECUTORS = {
-    "lookup_camera": execute_lookup_camera,
+    "send_alert": execute_send_alert,
     "check_inventory": execute_check_inventory,
     "create_ticket": execute_create_ticket,
     "assign_worker": execute_assign_worker,
@@ -235,21 +263,27 @@ def process_stockout_with_gemini(
         )
 
         # Build prompt for Gemini
-        prompt = f"""You are a retail automation assistant. A vision AI system has detected stock-out issues.
+        prompt = f"""You are an autonomous retail agent. A vision AI has detected stock-out issues that require immediate action.
 
 Camera: {camera_id}
 Detected Stock-Out Zones: {', '.join(detected_zones)}
 Vision AI Analysis: {pali_output}
 Shelf Commentary: {commentary}
 
-Your task:
-1. Look up camera details using lookup_camera
-2. Check inventory for each affected zone using check_inventory
-3. Create a restocking ticket for each zone using create_ticket
-4. Assign a worker to the ticket using assign_worker
-5. Send a notification if priority is high using send_notification
+Take autonomous action using these tools in order:
 
-Execute the tools for all {len(detected_zones)} detected zones."""
+1. SEND ALERTS - For each zone, send an appropriate alert:
+   - Use send_alert with "stocking_needed" for normal stock-outs
+   - Use send_alert with "escalate_to_manager" for critical issues
+   - Use send_alert with "urgent_restock" for high-priority zones
+
+2. CHECK INVENTORY - Verify stock levels for affected zones using check_inventory
+
+3. CREATE TICKETS - Generate restocking tickets using create_ticket
+
+4. ASSIGN WORKERS - Dispatch staff to handle restocking using assign_worker
+
+Process all {len(detected_zones)} zones and demonstrate autonomous decision-making."""
 
         # Call Gemini
         print(f"[Gemini] Calling API for {len(detected_zones)} zones...")
