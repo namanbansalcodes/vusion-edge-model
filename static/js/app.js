@@ -55,6 +55,11 @@ function switchVideo(index) {
     }
 
     updateVideoNavigation();
+
+    // Update active marker if markers are initialized
+    if (cameraMarkers.length > 0) {
+        updateActiveMarker(currentVideoIndex);
+    }
 }
 
 // Navigate to previous video
@@ -255,11 +260,26 @@ function updateFunctionCallsStep(data) {
     const outputDiv = document.getElementById('functions-output');
 
     if (data.calls && data.calls.length > 0) {
-        const callsList = data.calls.map(call =>
-            `<div style="margin-bottom: 8px;">
-                <strong>${call.name}</strong>: ${call.result}
-            </div>`
-        ).join('');
+        const callsList = data.calls.map(call => {
+            // Format the result object nicely
+            let resultText = '';
+            if (typeof call.result === 'object') {
+                resultText = Object.entries(call.result)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+            } else {
+                resultText = call.result;
+            }
+
+            return `<div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+                <div style="font-weight: bold; color: #2563eb; margin-bottom: 4px;">
+                    ✓ ${call.tool || call.name}
+                </div>
+                <div style="font-size: 0.9em; color: #666;">
+                    ${resultText}
+                </div>
+            </div>`;
+        }).join('');
         outputDiv.innerHTML = callsList;
         document.getElementById('step-functions').classList.add('active');
     } else {
@@ -351,6 +371,66 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Camera markers management
+const cameraMarkersContainer = document.getElementById('cameraMarkers');
+const storeMap = document.getElementById('storeMap');
+let cameraMarkers = [];
+
+// Generate camera positions on the map
+function initializeCameraMarkers() {
+    if (!storeMap || !cameraMarkersContainer || videoList.length === 0) return;
+
+    // Clear existing markers
+    cameraMarkersContainer.innerHTML = '';
+    cameraMarkers = [];
+
+    // Define camera positions (percentage-based for responsiveness)
+    const cameraPositions = [
+        { x: 20, y: 30 },
+        { x: 45, y: 25 },
+        { x: 70, y: 35 },
+        { x: 30, y: 60 },
+        { x: 55, y: 65 },
+        { x: 80, y: 70 }
+    ];
+
+    // Create markers for each video
+    videoList.forEach((video, index) => {
+        const position = cameraPositions[index % cameraPositions.length];
+
+        const marker = document.createElement('div');
+        marker.className = 'camera-marker';
+        marker.style.left = `${position.x}%`;
+        marker.style.top = `${position.y}%`;
+        marker.dataset.videoIndex = index;
+
+        // Mark first marker as active
+        if (index === currentVideoIndex) {
+            marker.classList.add('active');
+        }
+
+        // Click handler
+        marker.addEventListener('click', () => {
+            switchVideo(index);
+            updateActiveMarker(index);
+        });
+
+        cameraMarkersContainer.appendChild(marker);
+        cameraMarkers.push(marker);
+    });
+}
+
+// Update active marker when video changes
+function updateActiveMarker(index) {
+    cameraMarkers.forEach((marker, i) => {
+        if (i === index) {
+            marker.classList.add('active');
+        } else {
+            marker.classList.remove('active');
+        }
+    });
+}
+
 // Initialize on load
 window.addEventListener('load', () => {
     console.log('Page loaded, initializing...');
@@ -358,6 +438,9 @@ window.addEventListener('load', () => {
 
     // Initialize video navigation
     updateVideoNavigation();
+
+    // Initialize camera markers on the map
+    initializeCameraMarkers();
 
     // Ensure video loops and autoplays
     video.loop = true;
