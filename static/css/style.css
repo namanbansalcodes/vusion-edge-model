@@ -180,6 +180,7 @@ body {
     max-height: 30vh;
     object-fit: contain;
     display: block;
+    transform: scaleX(-1);  /* Flip video horizontally for display */
 }
 
 .video-info {
