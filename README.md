@@ -16,7 +16,7 @@ Real-time stock-out detection using fine-tuned PaliGemma 3B running 100% on-devi
 
 ## 🎯 The Problem
 
-**Stock-outs cost retailers $1+ trillion annually.** Empty shelves mean lost sales, frustrated customers, and wasted supply chain resources. Traditional monitoring requires manual checks or cloud-based vision systems that violate GDPR.
+**Stock-outs cost retailers multi-billion dollars annually.** Empty shelves mean lost sales, frustrated customers, and wasted supply chain resources. Traditional monitoring requires manual checks or cloud-based vision systems that violate GDPR.
 
 ## 💡 Our Solution for Vusion
 
