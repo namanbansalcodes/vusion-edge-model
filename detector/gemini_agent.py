@@ -230,7 +230,7 @@ def process_stockout_with_gemini(
 
         # Create Gemini model with tools
         model = genai.GenerativeModel(
-            model_name='gemini-2.0-flash-exp',
+            model_name='gemini-2.5-flash',
             tools=[retail_tools]
         )
 
