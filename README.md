@@ -9,6 +9,9 @@ Real-time stock-out detection using fine-tuned PaliGemma 3B running 100% on-devi
 ![Django](https://img.shields.io/badge/django-6.0-green.svg)
 ![PyTorch](https://img.shields.io/badge/pytorch-2.0-orange.svg)
 
+![Demo Interface](static/images/demo-screenshot.png)
+*Real-time stock-out detection with interactive store blueprint and live pipeline visualization*
+
 ---
 
 ## 🎯 The Problem
@@ -26,6 +29,12 @@ Real-time stock-out detection using fine-tuned PaliGemma 3B running 100% on-devi
 - ✅ Integrates with existing **Vusion shelf monitoring infrastructure**
 
 **Perfect for Vusion's compact on-shelf cameras** - lightweight model runs efficiently on edge devices like Raspberry Pi, Jetson Nano, or any embedded system with 6GB+ RAM.
+
+<p align="center">
+  <img src="static/images/vusion-camera.webp" alt="Vusion On-Shelf Camera" width="500">
+  <br>
+  <em>Vusion's compact on-shelf camera - ideal deployment target for edge AI</em>
+</p>
 
 ---
 
