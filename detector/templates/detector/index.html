@@ -21,10 +21,11 @@
         </header>
 
         <div class="content">
-            <section class="video-section">
-                <div class="section-header">
-                    <h2>Camera Feed</h2>
-                </div>
+            <div class="top-section">
+                <section class="video-section">
+                    <div class="section-header">
+                        <h2>Camera Feed</h2>
+                    </div>
                 <div class="video-wrapper">
                     <button id="prevVideoBtn" class="nav-btn" aria-label="Previous">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -54,6 +55,17 @@
                     <button id="analyzeBtn" class="btn btn-primary">Analyze Frame</button>
                 </div>
             </section>
+
+            <section class="map-section">
+                <div class="section-header">
+                    <h2>Store Layout</h2>
+                </div>
+                <div class="map-container">
+                    <img src="{% static 'image.png' %}" alt="Store Blueprint" class="store-map" id="storeMap">
+                    <div class="camera-markers" id="cameraMarkers"></div>
+                </div>
+            </section>
+        </div>
 
             <script>
                 window.VIDEO_LIST = [

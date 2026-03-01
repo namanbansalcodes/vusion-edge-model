@@ -62,8 +62,13 @@ body {
 .status-error { background: #f00; }
 
 .content {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top-section {
+    display: flex;
     gap: 12px;
 }
 
@@ -83,7 +88,66 @@ body {
     background: #0a0a0a;
     border: 1px solid #1a1a1a;
     padding: 16px;
-    max-width: 50%;
+    flex: 1;
+}
+
+.map-section {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    padding: 16px;
+    flex: 1;
+}
+
+.map-container {
+    position: relative;
+    background: #000;
+    border: 1px solid #1a1a1a;
+    max-height: 30vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.store-map {
+    width: 100%;
+    height: auto;
+    max-height: 30vh;
+    object-fit: contain;
+    display: block;
+}
+
+.camera-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.camera-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.15s ease;
+    transform: translate(-50%, -50%);
+}
+
+.camera-marker:hover {
+    width: 16px;
+    height: 16px;
+    background: #0f0;
+}
+
+.camera-marker.active {
+    background: #0f0;
+    box-shadow: 0 0 8px #0f0;
 }
 
 .video-wrapper {
@@ -373,6 +437,10 @@ body {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
+    }
+
+    .top-section {
+        flex-direction: column;
     }
 
     .video-wrapper {
