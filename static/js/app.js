@@ -157,11 +157,26 @@ async function processFrame() {
             // Update PaliGemma step
             updatePaliGemmaStep(result.steps.paligemma);
 
-            // Update Gemini step
-            updateGeminiStep(result.steps.gemini);
+            // If stock-out detected, show immediate processing state
+            if (result.steps.paligemma.detected_zones && result.steps.paligemma.detected_zones.length > 0) {
+                // Show Gemini is processing
+                updateStepStatus('gemini', 'processing');
+                updateLogs('gemini', ['Agent analyzing stock-out...', 'Deciding actions...']);
 
-            // Update Function Calls step
-            updateFunctionCallsStep(result.steps.function_calls);
+                // Show tool calls are pending
+                updateStepStatus('functions', 'processing');
+                updateLogs('functions', ['Waiting for agent decisions...']);
+
+                // Delay to show processing state, then update with results
+                setTimeout(() => {
+                    updateGeminiStep(result.steps.gemini);
+                    updateFunctionCallsStep(result.steps.function_calls);
+                }, 800);
+            } else {
+                // No stock-out, update immediately
+                updateGeminiStep(result.steps.gemini);
+                updateFunctionCallsStep(result.steps.function_calls);
+            }
         } else {
             updateLogs('paligemma', [`Error: ${result.error}`]);
             updateStepStatus('paligemma', 'error');
@@ -252,7 +267,7 @@ function updateGeminiStep(data) {
     }
 }
 
-// Update Function Calls step UI
+// Update Function Calls step UI - with animations and latest 5 only
 function updateFunctionCallsStep(data) {
     updateStepStatus('functions', data.status);
     updateLogs('functions', data.logs);
@@ -260,32 +275,62 @@ function updateFunctionCallsStep(data) {
     const outputDiv = document.getElementById('functions-output');
 
     if (data.calls && data.calls.length > 0) {
-        const callsList = data.calls.map(call => {
-            // Format the result object nicely
-            let resultText = '';
-            if (typeof call.result === 'object') {
-                resultText = Object.entries(call.result)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ');
-            } else {
-                resultText = call.result;
-            }
+        // Show only latest 5 tool calls
+        const latestCalls = data.calls.slice(-5);
 
-            return `<div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
-                <div style="font-weight: bold; color: #2563eb; margin-bottom: 4px;">
-                    ✓ ${call.tool || call.name}
-                </div>
-                <div style="font-size: 0.9em; color: #666;">
-                    ${resultText}
-                </div>
-            </div>`;
-        }).join('');
-        outputDiv.innerHTML = callsList;
+        // Clear and animate tool calls appearing one by one
+        outputDiv.innerHTML = '';
         document.getElementById('step-functions').classList.add('active');
+
+        // Add each call with staggered animation
+        latestCalls.forEach((call, index) => {
+            setTimeout(() => {
+                const callDiv = document.createElement('div');
+                callDiv.className = 'tool-call-item';
+                callDiv.style.opacity = '0';
+                callDiv.style.transform = 'translateY(10px)';
+
+                // Format the result object nicely
+                let resultText = '';
+                if (typeof call.result === 'object') {
+                    resultText = Object.entries(call.result)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(', ');
+                } else {
+                    resultText = call.result;
+                }
+
+                callDiv.innerHTML = `
+                    <div style="margin-bottom: 12px; padding: 10px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 8px; border-left: 3px solid #60a5fa; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <span style="font-size: 16px;">⚡</span>
+                            <div style="font-weight: 700; color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                ${call.tool || call.name}
+                            </div>
+                            <div style="margin-left: auto; background: #22c55e; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+                                EXECUTED
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; color: #e0e7ff; line-height: 1.6; font-family: monospace;">
+                            ${resultText}
+                        </div>
+                    </div>
+                `;
+
+                outputDiv.appendChild(callDiv);
+
+                // Animate in
+                setTimeout(() => {
+                    callDiv.style.transition = 'all 0.4s ease-out';
+                    callDiv.style.opacity = '1';
+                    callDiv.style.transform = 'translateY(0)';
+                }, 10);
+            }, index * 300); // Stagger by 300ms
+        });
     } else {
         outputDiv.innerHTML = `
             <span class="placeholder">
-                No function calls yet
+                Waiting for agent actions...
             </span>
         `;
         document.getElementById('step-functions').classList.remove('active');
