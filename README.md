@@ -13,16 +13,19 @@ Real-time stock-out detection using fine-tuned PaliGemma 3B running 100% on-devi
 
 ## 🎯 The Problem
 
-**Stock-outs cost retailers $1+ trillion annually.** Traditional solutions require cloud processing, violating GDPR for camera feeds.
+**Stock-outs cost retailers $1+ trillion annually.** Empty shelves mean lost sales, frustrated customers, and wasted supply chain resources. Traditional monitoring requires manual checks or cloud-based vision systems that violate GDPR.
 
-## 💡 Our Solution
+## 💡 Our Solution for Vusion
 
-**On-device AI** using fine-tuned PaliGemma that:
-- ✅ Detects stock-outs in **3x3 grid zones**
+**On-device AI designed for Vusion's on-shelf cameras** using fine-tuned PaliGemma that:
+- ✅ Detects stock-outs in **3x3 grid zones** for precise location tracking
 - ✅ Provides **shelf condition commentary** (tidiness, stability, stock levels)
-- ✅ Runs **100% on-device** (GDPR-compliant)
-- ✅ Works on **M3 Macs, Raspberry Pi, Jetson Nano**
-- ✅ **2-3 second inference** on edge devices
+- ✅ Runs **100% on-device** on Vusion's edge hardware (GDPR-compliant)
+- ✅ **Real-time alerts** with 2-3 second inference
+- ✅ **No cloud dependency** - works offline, respects customer privacy
+- ✅ Integrates with existing **Vusion shelf monitoring infrastructure**
+
+**Perfect for Vusion's compact on-shelf cameras** - lightweight model runs efficiently on edge devices like Raspberry Pi, Jetson Nano, or any embedded system with 6GB+ RAM.
 
 ---
 
@@ -81,17 +84,32 @@ open http://127.0.0.1:8000/
 
 ## 🏗️ Architecture
 
-### ML Pipeline
+### Vusion Deployment Model
 
 ```
-📹 Shelf Camera Feed
-    ↓
+📹 Vusion On-Shelf Cameras (compact, edge-mounted)
+    ↓ RTSP/Local Feed
 🔍 PaliGemma 3B (Stock-out Detection + Commentary)
     ↓ (if stock-out detected)
 💬 Gemma LLM (Reasoning Layer) [Integration Point]
     ↓
-⚡ Tool Calling (Alerts, Inventory Updates, etc.)
+⚡ Tool Calling (Alerts, Inventory Updates, Worker Assignment)
+    ↓
+📊 Vusion Dashboard / Store Management System
 ```
+
+### ML Pipeline
+
+```
+📹 Shelf Camera Feed → 🔍 Detection → 💬 Reasoning → ⚡ Action
+```
+
+**Key Advantage for Vusion:**
+- Processes video **on the camera itself** or nearby edge device
+- No need to stream video to cloud (bandwidth + privacy)
+- Instant alerts (no round-trip latency)
+- Works during internet outages
+- Scales to hundreds of cameras per store
 
 ### Tech Stack
 
@@ -99,7 +117,8 @@ open http://127.0.0.1:8000/
 - **Fine-tuning:** LoRA (Low-Rank Adaptation)
 - **Backend:** Django 6.0
 - **Inference:** PyTorch + Transformers + PEFT
-- **Device:** Apple Metal (MPS), CUDA, or CPU
+- **Device:** Vusion edge hardware, Apple Metal (MPS), CUDA, or CPU
+- **Deployment Target:** Compact on-shelf cameras with embedded compute
 
 ---
 

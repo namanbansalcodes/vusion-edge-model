@@ -22,7 +22,8 @@ env/
 
 # Model directories
 paligemma-keras-pali_gemma_3b_224-v4/
-paligemma_stockout_model/
+paligemma_stockout_model/*
+!paligemma_stockout_model/README.md
 
 # Dataset
 paligemma_dataset/
@@ -46,6 +47,7 @@ Thumbs.db
 # Secrets
 .env
 .env.*
+!.env.example
 *.key
 *_key.json
 credentials.json
