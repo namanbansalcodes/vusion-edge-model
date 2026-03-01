@@ -4,6 +4,7 @@ Replaces external Gemma service with Google Gemini API
 """
 import os
 import google.generativeai as genai
+from google.generativeai.types import FunctionDeclaration, Tool
 from typing import List, Dict, Any
 
 
@@ -16,109 +17,122 @@ def configure_gemini():
     genai.configure(api_key=api_key)
 
 
-# Tool definitions for retail workflow
-RETAIL_TOOLS = [
-    {
-        "name": "lookup_camera",
-        "description": "Get camera details and location information",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "camera_id": {
-                    "type": "string",
-                    "description": "Camera identifier (e.g., CAM-DEMO-01)"
-                }
-            },
-            "required": ["camera_id"]
-        }
-    },
-    {
-        "name": "check_inventory",
-        "description": "Check current inventory levels for products in a zone",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "zone": {
-                    "type": "string",
-                    "description": "Shelf zone (e.g., top-left, middle-center)"
-                },
-                "camera_id": {
-                    "type": "string",
-                    "description": "Camera identifier"
-                }
-            },
-            "required": ["zone", "camera_id"]
-        }
-    },
-    {
-        "name": "create_ticket",
-        "description": "Create a maintenance or restocking ticket",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "Ticket title"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Detailed description of the issue"
-                },
-                "priority": {
-                    "type": "string",
-                    "enum": ["low", "medium", "high", "urgent"],
-                    "description": "Ticket priority level"
-                },
-                "zone": {
-                    "type": "string",
-                    "description": "Affected shelf zone"
-                }
-            },
-            "required": ["title", "description", "priority", "zone"]
-        }
-    },
-    {
-        "name": "assign_worker",
-        "description": "Assign a worker to handle a task",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "ticket_id": {
-                    "type": "string",
-                    "description": "Ticket ID to assign"
-                },
-                "zone": {
-                    "type": "string",
-                    "description": "Work zone location"
-                }
-            },
-            "required": ["ticket_id", "zone"]
-        }
-    },
-    {
-        "name": "send_notification",
-        "description": "Send notification to store manager or staff",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "recipient": {
-                    "type": "string",
-                    "description": "Notification recipient (manager, staff, etc.)"
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Notification message"
-                },
-                "urgency": {
-                    "type": "string",
-                    "enum": ["low", "medium", "high"],
-                    "description": "Notification urgency"
-                }
-            },
-            "required": ["recipient", "message", "urgency"]
-        }
+# Define tools using proper Gemini format
+lookup_camera = FunctionDeclaration(
+    name="lookup_camera",
+    description="Get camera details and location information",
+    parameters={
+        "type": "object",
+        "properties": {
+            "camera_id": {
+                "type": "string",
+                "description": "Camera identifier (e.g., CAM-DEMO-01)"
+            }
+        },
+        "required": ["camera_id"]
     }
-]
+)
+
+check_inventory = FunctionDeclaration(
+    name="check_inventory",
+    description="Check current inventory levels for products in a zone",
+    parameters={
+        "type": "object",
+        "properties": {
+            "zone": {
+                "type": "string",
+                "description": "Shelf zone (e.g., top-left, middle-center)"
+            },
+            "camera_id": {
+                "type": "string",
+                "description": "Camera identifier"
+            }
+        },
+        "required": ["zone", "camera_id"]
+    }
+)
+
+create_ticket = FunctionDeclaration(
+    name="create_ticket",
+    description="Create a maintenance or restocking ticket",
+    parameters={
+        "type": "object",
+        "properties": {
+            "title": {
+                "type": "string",
+                "description": "Ticket title"
+            },
+            "description": {
+                "type": "string",
+                "description": "Detailed description of the issue"
+            },
+            "priority": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "urgent"],
+                "description": "Ticket priority level"
+            },
+            "zone": {
+                "type": "string",
+                "description": "Affected shelf zone"
+            }
+        },
+        "required": ["title", "description", "priority", "zone"]
+    }
+)
+
+assign_worker = FunctionDeclaration(
+    name="assign_worker",
+    description="Assign a worker to handle a task",
+    parameters={
+        "type": "object",
+        "properties": {
+            "ticket_id": {
+                "type": "string",
+                "description": "Ticket ID to assign"
+            },
+            "zone": {
+                "type": "string",
+                "description": "Work zone location"
+            }
+        },
+        "required": ["ticket_id", "zone"]
+    }
+)
+
+send_notification = FunctionDeclaration(
+    name="send_notification",
+    description="Send notification to store manager or staff",
+    parameters={
+        "type": "object",
+        "properties": {
+            "recipient": {
+                "type": "string",
+                "description": "Notification recipient (manager, staff, etc.)"
+            },
+            "message": {
+                "type": "string",
+                "description": "Notification message"
+            },
+            "urgency": {
+                "type": "string",
+                "enum": ["low", "medium", "high"],
+                "description": "Notification urgency"
+            }
+        },
+        "required": ["recipient", "message", "urgency"]
+    }
+)
+
+# Create tool object
+retail_tools = Tool(
+    function_declarations=[
+        lookup_camera,
+        check_inventory,
+        create_ticket,
+        assign_worker,
+        send_notification
+    ]
+)
 
 
 # Mock tool execution functions
@@ -216,8 +230,8 @@ def process_stockout_with_gemini(
 
         # Create Gemini model with tools
         model = genai.GenerativeModel(
-            model_name='gemini-2.0-flash',
-            tools=RETAIL_TOOLS
+            model_name='gemini-2.0-flash-exp',
+            tools=[retail_tools]
         )
 
         # Build prompt for Gemini
@@ -229,26 +243,25 @@ Vision AI Analysis: {pali_output}
 Shelf Commentary: {commentary}
 
 Your task:
-1. Look up camera details
-2. Check inventory for affected zones
-3. Create restocking tickets for each zone
-4. Assign workers to handle the restocking
-5. Send notifications if priority is high
+1. Look up camera details using lookup_camera
+2. Check inventory for each affected zone using check_inventory
+3. Create a restocking ticket for each zone using create_ticket
+4. Assign a worker to the ticket using assign_worker
+5. Send a notification if priority is high using send_notification
 
-Process all {len(detected_zones)} zones and execute the appropriate tools."""
+Execute the tools for all {len(detected_zones)} detected zones."""
 
         # Call Gemini
         response = model.generate_content(prompt)
 
         # Extract tool calls
         tool_calls = []
-        tool_results = []
 
         if hasattr(response, 'candidates') and response.candidates:
             candidate = response.candidates[0]
             if hasattr(candidate.content, 'parts'):
                 for part in candidate.content.parts:
-                    if hasattr(part, 'function_call'):
+                    if hasattr(part, 'function_call') and part.function_call:
                         fc = part.function_call
                         tool_name = fc.name
                         tool_args = dict(fc.args)
@@ -261,28 +274,25 @@ Process all {len(detected_zones)} zones and execute the appropriate tools."""
                                 'arguments': tool_args,
                                 'result': result
                             })
-                            tool_results.append({
-                                'tool': tool_name,
-                                'status': 'success',
-                                'output': result
-                            })
 
-        # Get final response with tool results
+        # Generate summary
         summary = f"Processed {len(detected_zones)} stock-out zones with {len(tool_calls)} tool calls"
 
         return {
             'status': 'success',
             'zones_processed': len(detected_zones),
             'tool_calls': tool_calls,
-            'tool_results': tool_results,
             'summary': summary,
             'raw_response': str(response.text) if hasattr(response, 'text') else 'Tool calls executed'
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {
             'status': 'error',
             'error': str(e),
             'tool_calls': [],
-            'tool_results': []
+            'zones_processed': 0,
+            'summary': f'Error: {str(e)}'
         }
