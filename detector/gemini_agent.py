@@ -252,10 +252,12 @@ Your task:
 Execute the tools for all {len(detected_zones)} detected zones."""
 
         # Call Gemini
+        print(f"[Gemini] Calling API for {len(detected_zones)} zones...")
         response = model.generate_content(prompt)
 
         # Extract tool calls
         tool_calls = []
+        response_text = ""
 
         if hasattr(response, 'candidates') and response.candidates:
             candidate = response.candidates[0]
@@ -266,24 +268,29 @@ Execute the tools for all {len(detected_zones)} detected zones."""
                         tool_name = fc.name
                         tool_args = dict(fc.args)
 
-                        # Execute tool
+                        # Mock execute tool (just print and return fake data)
+                        print(f"[Mock] Executing {tool_name} with args: {tool_args}")
                         if tool_name in TOOL_EXECUTORS:
                             result = TOOL_EXECUTORS[tool_name](**tool_args)
+                            print(f"[Mock] {tool_name} returned: {result}")
                             tool_calls.append({
                                 'name': tool_name,
                                 'arguments': tool_args,
                                 'result': result
                             })
+                    elif hasattr(part, 'text'):
+                        response_text += part.text
 
         # Generate summary
-        summary = f"Processed {len(detected_zones)} stock-out zones with {len(tool_calls)} tool calls"
+        summary = f"Gemini processed {len(detected_zones)} zones and suggested {len(tool_calls)} actions"
+        print(f"[Gemini] Complete! {len(tool_calls)} tool calls executed")
 
         return {
             'status': 'success',
             'zones_processed': len(detected_zones),
             'tool_calls': tool_calls,
             'summary': summary,
-            'raw_response': str(response.text) if hasattr(response, 'text') else 'Tool calls executed'
+            'raw_response': response_text if response_text else f"Executed {len(tool_calls)} tool calls"
         }
 
     except Exception as e:
