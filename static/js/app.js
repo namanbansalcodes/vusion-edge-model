@@ -152,8 +152,8 @@ async function processFrame() {
             // Update PaliGemma step
             updatePaliGemmaStep(result.steps.paligemma);
 
-            // Update Gemma step
-            updateGemmaStep(result.steps.gemma);
+            // Update Gemini step
+            updateGeminiStep(result.steps.gemini);
 
             // Update Function Calls step
             updateFunctionCallsStep(result.steps.function_calls);
@@ -219,22 +219,21 @@ function updatePaliGemmaStep(data) {
     outputDiv.innerHTML = outputHTML;
 }
 
-// Update Gemma step UI
-function updateGemmaStep(data) {
-    updateStepStatus('gemma', data.status);
-    updateLogs('gemma', data.logs);
+// Update Gemini step UI
+function updateGeminiStep(data) {
+    updateStepStatus('gemini', data.status);
+    updateLogs('gemini', data.logs);
 
-    const outputDiv = document.getElementById('gemma-output');
+    const outputDiv = document.getElementById('gemini-output');
 
     if (data.enabled) {
         if (data.output) {
-            // Teammate's integration will populate this
             outputDiv.innerHTML = `<div>${data.output}</div>`;
-            document.getElementById('step-gemma').classList.add('active');
+            document.getElementById('step-gemini').classList.add('active');
         } else {
             outputDiv.innerHTML = `
                 <span class="placeholder">
-                    Integration pending
+                    Processing...
                 </span>
             `;
         }
@@ -244,7 +243,7 @@ function updateGemmaStep(data) {
                 Skipped
             </span>
         `;
-        document.getElementById('step-gemma').classList.remove('active');
+        document.getElementById('step-gemini').classList.remove('active');
     }
 }
 
