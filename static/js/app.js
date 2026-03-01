@@ -253,16 +253,22 @@ function updateGeminiStep(data) {
             // Display live agent reasoning
             if (data.reasoning && data.reasoning.length > 0) {
                 reasoningHTML = `
-                    <div style="background: #0a0f1a; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 3px solid #818cf8;">
-                        <div style="font-weight: 700; color: #818cf8; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                            🧠 Agent Reasoning (Live)
+                    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 8px; padding: 14px; margin-bottom: 12px; border: 1px solid #334155;">
+                        <div style="font-weight: 600; color: #94a3b8; margin-bottom: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+                            Agent Reasoning
                         </div>
-                        <div style="font-family: monospace; font-size: 11px; line-height: 1.8; color: #e5e7eb;">
-                            ${data.reasoning.map((line, index) => `
-                                <div style="padding: 4px 0; opacity: 0; animation: fadeInUp 0.4s ease-out ${index * 0.15}s forwards;">
-                                    ${line}
-                                </div>
-                            `).join('')}
+                        <div style="font-family: 'SF Mono', 'Monaco', 'Consolas', monospace; font-size: 11px; line-height: 2; color: #cbd5e1;">
+                            ${data.reasoning.map((line, index) => {
+                                const [label, ...rest] = line.split('→');
+                                const content = rest.join('→').trim();
+                                return `
+                                    <div style="padding: 2px 0; opacity: 0; animation: fadeInUp 0.4s ease-out ${index * 0.12}s forwards;">
+                                        <span style="color: #818cf8; font-weight: 600;">${label.trim()}</span>
+                                        <span style="color: #64748b; margin: 0 6px;">→</span>
+                                        <span style="color: #e2e8f0;">${content}</span>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -346,18 +352,19 @@ function updateFunctionCallsStep(data) {
                     resultText = call.result;
                 }
 
+                const toolName = (call.tool || call.name).replace(/_/g, ' ').toUpperCase();
+
                 callDiv.innerHTML = `
-                    <div style="margin-bottom: 12px; padding: 10px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 8px; border-left: 3px solid #60a5fa; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                            <span style="font-size: 16px;">⚡</span>
-                            <div style="font-weight: 700; color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
-                                ${call.tool || call.name}
+                    <div style="margin-bottom: 10px; padding: 12px; background: #1e293b; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="font-weight: 600; color: #60a5fa; font-size: 12px; letter-spacing: 0.3px;">
+                                ${toolName}
                             </div>
-                            <div style="margin-left: auto; background: #22c55e; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">
-                                EXECUTED
+                            <div style="background: #166534; color: #86efac; padding: 3px 10px; border-radius: 4px; font-size: 9px; font-weight: 600; letter-spacing: 0.5px;">
+                                SUCCESS
                             </div>
                         </div>
-                        <div style="font-size: 11px; color: #e0e7ff; line-height: 1.6; font-family: monospace;">
+                        <div style="font-size: 10px; color: #94a3b8; line-height: 1.7; font-family: 'SF Mono', 'Monaco', monospace; padding-left: 4px;">
                             ${resultText}
                         </div>
                     </div>

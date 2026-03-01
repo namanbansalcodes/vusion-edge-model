@@ -157,15 +157,15 @@ def execute_send_alert(alert_type: str, message: str, zone: str, severity: str) 
 
     # Map alert types to display messages
     alert_messages = {
-        "stocking_needed": "🔔 STOCKING UP NEEDED",
-        "escalate_to_manager": "⚠️ ESCALATED TO MANAGER",
-        "urgent_restock": "🚨 URGENT RESTOCK REQUIRED",
-        "vendor_order_needed": "📦 VENDOR ORDER NEEDED"
+        "stocking_needed": "STOCKING REQUIRED",
+        "escalate_to_manager": "ESCALATED TO MANAGER",
+        "urgent_restock": "URGENT RESTOCK",
+        "vendor_order_needed": "VENDOR ORDER NEEDED"
     }
 
     return {
         "alert_id": alert_id,
-        "type": alert_messages.get(alert_type, alert_type),
+        "type": alert_messages.get(alert_type, alert_type.replace('_', ' ').upper()),
         "message": message,
         "zone": zone,
         "severity": severity.upper(),
@@ -287,13 +287,13 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
 
         # Build agent reasoning log
         reasoning_log = []
-        reasoning_log.append(f"📥 RECEIVED: Vision AI detected {len(detected_zones)} stock-out zones")
-        reasoning_log.append(f"🔍 ANALYZING: {', '.join(detected_zones)}")
-        reasoning_log.append(f"💭 CONTEXT: {pali_output[:100]}...")
+        reasoning_log.append(f"INPUT → Vision AI detected {len(detected_zones)} stock-out zones")
+        reasoning_log.append(f"ZONES → {', '.join(detected_zones)}")
+        reasoning_log.append(f"CONTEXT → {pali_output[:100]}...")
 
         # Call Gemini
         print(f"[Gemini] Calling API for {len(detected_zones)} zones...")
-        reasoning_log.append(f"🤖 AGENT: Evaluating severity and determining action plan...")
+        reasoning_log.append(f"EVALUATING → Assessing severity and determining action plan")
 
         response = model.generate_content(prompt)
 
@@ -312,14 +312,14 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
 
                         # Add reasoning for each tool call
                         if tool_name == 'send_alert':
-                            alert_type = tool_args.get('alert_type', 'unknown')
-                            reasoning_log.append(f"⚡ DECISION: Sending {alert_type} alert for {tool_args.get('zone', 'unknown')}")
+                            alert_type = tool_args.get('alert_type', 'unknown').replace('_', ' ').title()
+                            reasoning_log.append(f"ALERT → {alert_type} for {tool_args.get('zone', 'unknown')}")
                         elif tool_name == 'check_inventory':
-                            reasoning_log.append(f"📊 ACTION: Checking inventory levels for {tool_args.get('zone', 'unknown')}")
+                            reasoning_log.append(f"INVENTORY → Checking stock levels for {tool_args.get('zone', 'unknown')}")
                         elif tool_name == 'create_ticket':
-                            reasoning_log.append(f"🎫 ACTION: Creating {tool_args.get('priority', 'normal')} priority ticket")
+                            reasoning_log.append(f"TICKET → Creating {tool_args.get('priority', 'normal')} priority work order")
                         elif tool_name == 'assign_worker':
-                            reasoning_log.append(f"👷 ACTION: Assigning worker to {tool_args.get('zone', 'unknown')}")
+                            reasoning_log.append(f"DISPATCH → Assigning worker to {tool_args.get('zone', 'unknown')}")
 
                         # Mock execute tool (just print and return fake data)
                         print(f"[Mock] Executing {tool_name} with args: {tool_args}")
@@ -335,8 +335,8 @@ Process all {len(detected_zones)} zones and demonstrate autonomous decision-maki
                         response_text += part.text
 
         # Final reasoning
-        reasoning_log.append(f"✅ COMPLETE: Executed {len(tool_calls)} autonomous actions")
-        reasoning_log.append(f"📋 SUMMARY: Stock-out response workflow completed for {len(detected_zones)} zones")
+        reasoning_log.append(f"COMPLETE → {len(tool_calls)} actions executed successfully")
+        reasoning_log.append(f"STATUS → Workflow completed for {len(detected_zones)} zones")
 
         # Generate summary
         summary = f"Agent autonomously processed {len(detected_zones)} zones with {len(tool_calls)} actions"
